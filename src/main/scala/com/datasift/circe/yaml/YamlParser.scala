@@ -12,19 +12,26 @@ import scala.annotation.tailrec
 import scala.util.control.{NoStackTrace, NonFatal}
 import scala.collection.mutable
 
-// todo: write our own Mark => String function for error messages
 sealed abstract class YamlParseError(msg: String)
   extends Exception(msg) //with NoStackTrace
 
-case class UnexpectedInputError(event: Event, input: Option[Json] = None)
-  extends YamlParseError(
-    "Unexpected input" +
-      input.map(": " + _.toString).getOrElse(event.toString) +
-      s"\n${event.getStartMark.toString}")
+object UnexpectedInputError {
+  private def format(event: Event): String = {
+    val tpe   = event.getClass.getSimpleName
+    val value = event match {
+      case e: ScalarEvent =>
+        "(%c%s%c)".format(e.getStyle.toChar, e.getValue, e.getStyle.toChar)
+      case _ => ""
+    }
+    tpe + value + event.getStartMark
+  }
+}
+case class UnexpectedInputError(event: Event) extends YamlParseError(
+  s"Unexpected input: ${UnexpectedInputError.format(event)}")
 
 case class AnchorNotFoundError(anchor: String, event: Event)
   extends YamlParseError(
-    s"Anchor '$anchor' not found: ${event.getStartMark.toString}")
+    s"Anchor '$anchor' not found: ${event.getStartMark}")
 
 case class InvalidKeyError(node: Json)
   extends YamlParseError(s"$node is not a valid mapping key")
@@ -35,16 +42,14 @@ sealed trait ParserContext {
 }
 
 case class SequenceContext(elements: mutable.Buffer[Json],
-                           anchor: Option[String])
-  extends ParserContext {
+                           anchor: Option[String]) extends ParserContext {
 
   final def add(value: Json): ParserContext =
     SequenceContext(elements += value, anchor)
 }
 
 case class MappingKeyContext(elements: mutable.Buffer[(String, Json)],
-                             anchor: Option[String])
-  extends ParserContext {
+                             anchor: Option[String]) extends ParserContext {
 
   final def add(value: Json): ParserContext =
     MappingValueContext(
@@ -53,8 +58,7 @@ case class MappingKeyContext(elements: mutable.Buffer[(String, Json)],
 
 case class MappingValueContext(key: String,
                                elements: mutable.Buffer[(String, Json)],
-                               anchor: Option[String])
-  extends ParserContext {
+                               anchor: Option[String]) extends ParserContext {
 
   final def add(value: Json): ParserContext =
     MappingKeyContext(elements += key -> value, anchor)
