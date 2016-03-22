@@ -13,7 +13,7 @@ import scala.util.control.{NoStackTrace, NonFatal}
 import scala.collection.mutable
 
 sealed abstract class YamlParseError(msg: String)
-  extends Exception(msg) //with NoStackTrace
+  extends Exception(msg) with NoStackTrace
 
 object UnexpectedInputError {
   private def format(event: Event): String = {
@@ -82,7 +82,7 @@ class YamlParser extends Parser {
   @tailrec
   private[yaml] final def parse(stream: Iterator[Event],
                                 ctx: List[ParserContext] = Nil,
-                                aliases: Map[String, Json] = Map.empty): Json = {
+                                aliases: Map[String, Json] = Map()): Json = {
     val event = stream.next()
 
     val (value, newCtx, newAliases) = event match {
