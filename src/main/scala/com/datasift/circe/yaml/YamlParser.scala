@@ -31,14 +31,14 @@ case class InvalidKeyError(node: Json)
 
 sealed trait ParserContext {
   def anchor: Option[String]
-  def add(value: Json, sourceEvent: Event, ctx: List[ParserContext] = Nil): ParserContext
+  def add(value: Json): ParserContext
 }
 
 case class SequenceContext(elements: mutable.Buffer[Json],
                            anchor: Option[String])
   extends ParserContext {
 
-  final def add(value: Json, sourceEvent: Event, ctx: List[ParserContext] = Nil): ParserContext =
+  final def add(value: Json): ParserContext =
     SequenceContext(elements += value, anchor)
 }
 
@@ -46,7 +46,7 @@ case class MappingKeyContext(elements: mutable.Buffer[(String, Json)],
                              anchor: Option[String])
   extends ParserContext {
 
-  final def add(value: Json, sourceEvent: Event, ctx: List[ParserContext] = Nil): ParserContext =
+  final def add(value: Json): ParserContext =
     MappingValueContext(
       value.asString.getOrElse(throw InvalidKeyError(value)), elements, anchor)
 }
@@ -56,7 +56,7 @@ case class MappingValueContext(key: String,
                                anchor: Option[String])
   extends ParserContext {
 
-  final def add(value: Json, sourceEvent: Event, ctx: List[ParserContext] = Nil): ParserContext =
+  final def add(value: Json): ParserContext =
     MappingKeyContext(elements += key -> value, anchor)
 }
 
@@ -152,7 +152,7 @@ class YamlParser extends Parser {
       case value =>
         val context = value.map { v =>
           val head :: tail = newCtx
-          head.add(v, event, newCtx) :: tail
+          head.add(v) :: tail
         }.getOrElse(newCtx)
 
         parse(stream, context, newAliases)
