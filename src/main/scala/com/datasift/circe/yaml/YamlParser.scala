@@ -1,14 +1,12 @@
 package com.datasift.circe.yaml
 
-import java.io.StringReader
-
 import cats.data.Xor
 import io.circe.{JsonNumber, Json, ParsingFailure, Parser}
-import org.yaml.snakeyaml.Yaml
+import org.yaml.snakeyaml.parser.ParserImpl
 import org.yaml.snakeyaml.events._
+import org.yaml.snakeyaml.reader.StreamReader
 
 import scala.annotation.tailrec
-import scala.collection.JavaConverters.asScalaIteratorConverter
 import scala.util.control.{NoStackTrace, NonFatal}
 import scala.collection.mutable
 
@@ -60,15 +58,17 @@ case class MappingValueContext(key: String,
     MappingKeyContext(elements += key -> value, anchor)
 }
 
-class YamlParser(yaml: Yaml = new Yaml) extends Parser {
+class YamlParser extends Parser {
 
   override def parse(input: String): Xor[ParsingFailure, Json] = try {
-    Xor.right {
-      parse(yaml.parse(new StringReader(input)).iterator.asScala)
+    val parser = new ParserImpl(new StreamReader(input))
+    val iterator = new Iterator[Event] {
+      override def hasNext: Boolean = parser.peekEvent() != null
+      override def next(): Event = parser.getEvent
     }
+    Xor.right { parse(iterator) }
   } catch {
-    case p: ParsingFailure =>
-      Xor.left(p)
+    case p: ParsingFailure => Xor.left(p)
     case NonFatal(t) =>
       Xor.left(ParsingFailure("Failed to parse YAML from stream", t))
   }
