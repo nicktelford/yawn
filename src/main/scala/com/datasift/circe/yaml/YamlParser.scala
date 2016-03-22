@@ -2,9 +2,11 @@ package com.datasift.circe.yaml
 
 import cats.data.Xor
 import io.circe.{JsonNumber, Json, ParsingFailure, Parser}
+import org.yaml.snakeyaml.nodes.{NodeId, Tag}
 import org.yaml.snakeyaml.parser.ParserImpl
 import org.yaml.snakeyaml.events._
 import org.yaml.snakeyaml.reader.StreamReader
+import org.yaml.snakeyaml.resolver.Resolver
 
 import scala.annotation.tailrec
 import scala.util.control.{NoStackTrace, NonFatal}
@@ -59,6 +61,7 @@ case class MappingValueContext(key: String,
 }
 
 class YamlParser extends Parser {
+  val resolver = new Resolver
 
   override def parse(input: String): Xor[ParsingFailure, Json] = try {
     val parser = new ParserImpl(new StreamReader(input))
@@ -108,29 +111,33 @@ class YamlParser extends Parser {
           (Some(node), stack, aliases + (anchor -> node))
         case _ => throw UnexpectedInputError(e)
       }
-        // todo: use SnakeYAML "Resolver" to automatically determine the type when Tag is missing
       case e: ScalarEvent =>
         val value = e.getValue
         val anchor = e.getAnchor
-        val (node, c) = ctx match {
-          case _ if e.getValue == null =>
-            // scalar is null
-            (Json.empty, ctx)
-          case _ if e.getStyle == 0.toChar =>
-            // scalar is unquoted - attempt to parse as number first
-            val node = JsonNumber.fromString(value)
-              .map(Json.fromJsonNumber)
-              .getOrElse(Json.string(value))
-            (node, ctx)
-          case _ =>
-            // scalar is a string
-            (Json.string(value), ctx)
+        val tag = Option(e.getTag)
+          .map(new Tag(_))
+          .getOrElse {
+            resolver.resolve(
+              NodeId.scalar, value, e.getImplicit.canOmitTagInPlainScalar)
+          }
+        val node = (value, tag) match {
+          case (null, _) => Json.empty
+          case (v, Tag.BOOL) => Deserializer
+            .boolean(v)
+            .map(Json.bool)
+            .getOrElse(Json.string(v))
+          case (v, Tag.FLOAT | Tag.INT) => JsonNumber
+            .fromString(v)
+            .map(Json.fromJsonNumber)
+            .getOrElse(Json.string(v))
+          case (v, Tag.NULL) => Json.empty
+          case (v, _) => Json.string(v)
         }
 
         // add aliases if they're defined
         node match {
-          case node if anchor == null => (Some(node), c, aliases)
-          case node => (Some(node), c, aliases + (anchor -> node))
+          case node if anchor == null => (Some(node), ctx, aliases)
+          case node => (Some(node), ctx, aliases + (anchor -> node))
         }
 
       case e: AliasEvent =>
@@ -151,4 +158,12 @@ class YamlParser extends Parser {
         parse(stream, context, newAliases)
     }
   }
+}
+
+private[yaml] object Deserializer {
+  private val booleans = Map(
+    "yes" -> true, "true" -> true, "on" -> true,
+    "no" -> false, "false" -> false, "off" -> false)
+
+  def boolean(value: String): Option[Boolean] = booleans.get(value.toLowerCase)
 }
