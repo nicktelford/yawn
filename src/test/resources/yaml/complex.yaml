@@ -8,6 +8,10 @@ nested:
       color: red
     - type: simple
       color: blue
-  booleans: [ true, false, yes, no, Yes, No, True, False ]
+      integer: 47213
+      quoted_int: "56789"
+      float: 3.14
+      quoted_float: "6.28"
+  booleans: [ true, false, yes, no, Yes, No, True, False, "yes" ]
 
 another list: *testanchor

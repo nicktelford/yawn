@@ -10,10 +10,14 @@
       },
       {
         "type": "simple",
-        "color": "blue"
+        "color": "blue",
+        "integer": 47213,
+        "quoted_int": "56789",
+        "float": 3.14,
+        "quoted_float": "6.28"
       }
     ],
-    "booleans": [true, false, true, false, true, false, true, false]
+    "booleans": [true, false, true, false, true, false, true, false, "yes" ]
   },
   "another list": [
     {
@@ -22,7 +26,11 @@
     },
     {
       "type": "simple",
-      "color": "blue"
+      "color": "blue",
+      "integer": 47213,
+      "quoted_int": "56789",
+      "float": 3.14,
+      "quoted_float": "6.28"
     }
   ]
 }
