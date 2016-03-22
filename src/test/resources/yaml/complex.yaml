@@ -1,0 +1,13 @@
+simple_key: simple_value
+"quoted key": "quoted value"
+plain key: plain value
+
+nested:
+  list: &testanchor
+    - type: complex
+      color: red
+    - type: simple
+      color: blue
+  booleans: [ true, false, yes, no, Yes, No, True, False ]
+
+another list: *testanchor

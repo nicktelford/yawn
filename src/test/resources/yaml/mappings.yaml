@@ -1,0 +1,7 @@
+hello:
+  world: 12345
+  many:
+    nested:
+      levels: 5678
+    here:
+      too: 6789

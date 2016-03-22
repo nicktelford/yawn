@@ -1,0 +1,28 @@
+{
+  "simple_key": "simple_value",
+  "quoted key": "quoted value",
+  "plain key": "plain value",
+  "nested": {
+    "list": [
+      {
+        "type": "complex",
+        "color": "red"
+      },
+      {
+        "type": "simple",
+        "color": "blue"
+      }
+    ],
+    "booleans": [true, false, true, false, true, false, true, false]
+  },
+  "another list": [
+    {
+      "type": "complex",
+      "color": "red"
+    },
+    {
+      "type": "simple",
+      "color": "blue"
+    }
+  ]
+}
