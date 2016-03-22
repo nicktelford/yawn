@@ -76,8 +76,7 @@ class YamlParser extends Parser {
     Xor.right { parse(iterator) }
   } catch {
     case p: ParsingFailure => Xor.left(p)
-    case NonFatal(t) =>
-      Xor.left(ParsingFailure("Failed to parse YAML from stream", t))
+    case NonFatal(t) => Xor.left(ParsingFailure(t.getMessage, t))
   }
 
   @tailrec
