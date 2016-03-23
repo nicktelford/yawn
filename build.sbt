@@ -20,3 +20,5 @@ libraryDependencies ++= Seq(
   "io.circe" %% "circe-jawn" % circeVersion % Test
 )
 
+testOptions in Test += Tests.Argument("-oF")
+

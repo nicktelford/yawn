@@ -13,5 +13,6 @@ nested:
       float: 3.14
       quoted_float: "6.28"
   booleans: [ true, false, yes, no, Yes, No, True, False, "yes" ]
+  123: what about this?
 
 another list: *testanchor

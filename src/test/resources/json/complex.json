@@ -17,7 +17,8 @@
         "quoted_float": "6.28"
       }
     ],
-    "booleans": [true, false, true, false, true, false, true, false, "yes" ]
+    "booleans": [true, false, true, false, true, false, true, false, "yes" ],
+    "123": "what about this?"
   },
   "another list": [
     {
