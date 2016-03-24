@@ -6,8 +6,8 @@ import io.circe.jawn.JawnParser
 
 class CirceParserSpec extends ParserSpec[CirceParser, Json] {
 
-  val yaml = new YawnParser()
-  val json = new JawnParser()
+  override val yaml = new YawnParser()
+  override val json = new JawnParser()
 
   override def parse(parser: CirceParser): (String) => Json =
     parser.parse(_).fold(e => throw new Exception(e.getMessage), identity)

@@ -1,10 +1,10 @@
 package com.datasift.yawn
 
-import org.scalatest.FlatSpec
+import org.scalatest.FunSpec
 
 import scala.io.Source
 
-trait ParserSpec[P, A] extends FlatSpec {
+trait ParserSpec[P, A] extends FunSpec {
 
   def yaml: P
   def json: P
@@ -16,12 +16,14 @@ trait ParserSpec[P, A] extends FlatSpec {
   def file(format: String, name: String): String =
     s"/$format/$name.$format"
 
-  Seq("list", "mappings", "anchors", "complex").foreach { name =>
-    name should "parse to circe AST" in {
-      assert(
-        parse(yaml)(read(file("yaml", name))) ===
-        parse(json)(read(file("json", name)))
-      )
+  describe("yaml parser") {
+    Seq("list", "mappings", "anchors", "complex").foreach { filename =>
+      it(s"should parse $filename.yaml as $filename.json") {
+        assert(
+          parse(yaml)(read(file("yaml", filename))) ===
+          parse(json)(read(file("json", filename)))
+        )
+      }
     }
   }
 }
