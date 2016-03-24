@@ -1,6 +1,8 @@
-package com.datasift.yaml
+package com.datasift.yawn
 
 import java.io.{File, FileReader, Reader}
+import java.nio.ByteBuffer
+import java.nio.channels.ReadableByteChannel
 
 import org.yaml.snakeyaml.events.Event
 import org.yaml.snakeyaml.parser.ParserImpl
@@ -8,24 +10,28 @@ import org.yaml.snakeyaml.reader.StreamReader
 
 import scala.util.Try
 
-object Parser {
+trait SupportParser[A] {
+  implicit def facade: Facade[A]
 
-  def parseUnsafeString[A : Facade](string: String): A =
+  def parseUnsafeString(string: String): A =
     parseFromParserUnsafe(new StreamReader(string))
 
-  def parseUnsafeReader[A : Facade](reader: Reader): A =
+  def parseUnsafeReader(reader: Reader): A =
     parseFromParserUnsafe(new StreamReader(reader))
 
-  def parseFromString[A : Facade](s: String): Try[A] =
+  def parseFromString(s: String): Try[A] =
     Try(parseUnsafeString(s))
 
-  def parseFromPath[A: Facade](path: String): Try[A] =
+  def parseFromPath(path: String): Try[A] =
     Try(parseUnsafeReader(new FileReader(path)))
 
-  def parseFromFile[A : Facade](file: File): Try[A] =
+  def parseFromFile(file: File): Try[A] =
     Try(parseUnsafeReader(new FileReader(file)))
 
-  protected def parseFromParserUnsafe[A : Facade](reader: StreamReader): A = {
+  def parseFromChannel(channel: ReadableByteChannel): Try[A] = ???
+  def parseFromByteBuffer(buffer: ByteBuffer): Try[A] = ???
+
+  protected def parseFromParserUnsafe(reader: StreamReader): A = {
     val parser = new ParserImpl(reader)
     val iterator = new Iterator[Event] {
       override def hasNext: Boolean = parser.peekEvent() != null

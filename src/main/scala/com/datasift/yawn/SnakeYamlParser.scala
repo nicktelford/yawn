@@ -1,4 +1,4 @@
-package com.datasift.yaml
+package com.datasift.yawn
 
 import org.yaml.snakeyaml.events._
 import org.yaml.snakeyaml.nodes.{NodeId, Tag}
