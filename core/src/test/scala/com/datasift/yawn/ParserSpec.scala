@@ -10,8 +10,9 @@ trait ParserSpec[P, A] extends FunSpec {
   def json: P
   def parse(parser: P): String => A
 
-  def read(name: String) =
-    Source.fromInputStream(getClass.getResourceAsStream(name)).mkString
+  def read(name: String) = Option(getClass.getResourceAsStream(name)).map {
+    Source.fromInputStream(_).mkString
+  }
 
   def file(format: String, name: String): String =
     s"/$format/$name.$format"
@@ -20,8 +21,8 @@ trait ParserSpec[P, A] extends FunSpec {
     Seq("list", "mappings", "anchors", "complex").foreach { filename =>
       it(s"should parse $filename.yaml as $filename.json") {
         assert(
-          parse(yaml)(read(file("yaml", filename))) ===
-          parse(json)(read(file("json", filename)))
+          read(file("yaml", filename)).map(parse(yaml)) ===
+          read(file("json", filename)).map(parse(json))
         )
       }
     }

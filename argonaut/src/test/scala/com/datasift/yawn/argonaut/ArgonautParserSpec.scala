@@ -3,9 +3,6 @@ package com.datasift.yawn.argonaut
 import argonaut.{Json, Parse}
 import com.datasift.yawn.ParserSpec
 
-import scalaz._
-import Scalaz._
-
 class ArgonautParserSpec extends ParserSpec[Parse[String], Json] {
 
   override val yaml = YamlParse

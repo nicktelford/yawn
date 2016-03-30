@@ -1,8 +1,8 @@
 package com.datasift.yawn.circe
 
 import com.datasift.yawn.ParserSpec
-import io.circe.{Parser => CirceParser, Json}
 import io.circe.jawn.JawnParser
+import io.circe.{Parser => CirceParser, Json}
 
 class CirceParserSpec extends ParserSpec[CirceParser, Json] {
 
