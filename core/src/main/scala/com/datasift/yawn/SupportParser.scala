@@ -37,6 +37,6 @@ trait SupportParser[A] {
       override def hasNext: Boolean = parser.peekEvent() != null
       override def next(): Event = parser.getEvent
     }
-    new SnakeYamlParser().parse(iterator)
+    new SnakeYamlParser(reader).parse(iterator)
   }
 }
