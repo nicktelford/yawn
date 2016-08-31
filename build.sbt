@@ -1,4 +1,4 @@
-val circeVersion = "0.3.0"
+val circeVersion = "0.5.0-M3"
 val argonautVersion = "6.1"
 val snakeYamlVersion = "1.17"
 val scalaTestVersion = "3.0.0-M15"

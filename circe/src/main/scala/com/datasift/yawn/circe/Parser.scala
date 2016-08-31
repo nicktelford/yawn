@@ -45,14 +45,14 @@ object Parser extends SupportParser[Json] {
       override def result: Json = Json.fromValues(kvs)
     }
 
-    override val jnull: Json = Json.empty
+    override val jnull: Json = Json.Null
     override val jfalse: Json = Json.False
     override val jtrue: Json = Json.True
     override def jnum(v: String): Json =
-      if (v.startsWith("-.")) Json.Empty
-      else Json.fromJsonNumber(JsonNumber.unsafeDecimal(v))
-    override def jint(v: String): Json =
-      Json.fromJsonNumber(JsonNumber.unsafeIntegral(v))
-    override def jstring(v: String): Json = Json.string(v)
+      JsonNumber.fromString(v)
+        .map(Json.fromJsonNumber)
+        .getOrElse(throw new NumberFormatException(v))
+    override def jint(v: String): Json = Json.fromInt(v.toInt)
+    override def jstring(v: String): Json = Json.fromString(v)
   }
 }
